@@ -1,0 +1,30 @@
+node_modules/
+dist/
+build/
+coverage/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Logs / OS / editor
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Uploads / temp
+upload/
+uploads/
+tmp/
+temp/
+.cache/
+*.tmp
+
+# Local tool settings
+.claude/settings.local.json

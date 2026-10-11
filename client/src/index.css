@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+
+/*
+ * Theme tokens: bg-app, bg-sidebar, bg-surface, border-line, text-fg, text-muted, accent, ...
+ * Each maps to a CSS variable whose value depends on <html data-theme="light|dark">
+ * (set by public/theme-init.js and uiStore.setTheme). Use these, never raw hex values.
+ * Code blocks are the exception: they stay dark in both themes (see .code-block below).
+ */
+@theme inline {
+  --color-app: var(--app);
+  --color-sidebar: var(--sidebar);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-link: var(--link);
+  --color-accent: #10a37f;
+  --color-accent-hover: #0d8c6d;
+  --color-danger: var(--danger);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+}
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --app: #212121;
+  --sidebar: #171717;
+  --surface: #2f2f2f;
+  --surface-hover: #3a3a3a;
+  --line: #424242;
+  --line-strong: #565656;
+  --fg: #ececec;
+  --muted: #9b9b9b;
+  --link: #7ab7ff;
+  --danger: #f87171;
+  --scrollbar: #4a4a4a;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --app: #ffffff;
+  --sidebar: #f9f9f9;
+  --surface: #f2f2f2;
+  --surface-hover: #e8e8e8;
+  --line: #e3e3e3;
+  --line-strong: #c4c4c4;
+  --fg: #0d0d0d;
+  --muted: #6b6b6b;
+  --link: #1d64d8;
+  --danger: #dc2626;
+  --scrollbar: #c9c9c9;
+}
+
+@layer base {
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-app text-fg font-sans antialiased;
+  }
+
+  /* Keep browser autofill from painting inputs light yellow/blue. */
+  input:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-fg);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-app) inset;
+    caret-color: var(--color-fg);
+  }
+
+  /* Thin scrollbars that match the theme. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar) transparent;
+  }
+}
+
+/* Assistant message Markdown (rendered by components/chat/Markdown.jsx). */
+@layer components {
+  .markdown {
+    @apply text-[15px] leading-7 break-words text-fg;
+
+    & > :first-child { @apply mt-0; }
+    & > :last-child { @apply mb-0; }
+
+    & p { @apply my-3; }
+    & h1 { @apply mt-6 mb-3 text-2xl font-semibold; }
+    & h2 { @apply mt-6 mb-3 text-xl font-semibold; }
+    & h3 { @apply mt-5 mb-2 text-lg font-semibold; }
+    & h4, & h5, & h6 { @apply mt-4 mb-2 font-semibold; }
+    & strong { @apply font-semibold; }
+    & a { @apply text-link underline underline-offset-2 hover:opacity-80; }
+    & hr { @apply my-6 border-line; }
+
+    & ul { @apply my-3 list-disc pl-6; }
+    & ol { @apply my-3 list-decimal pl-6; }
+    & li { @apply my-1 pl-1; }
+    & li > ul, & li > ol { @apply my-1; }
+    & li::marker { @apply text-muted; }
+    & .contains-task-list { @apply list-none pl-1; }
+
+    & blockquote { @apply my-4 border-l-2 border-line pl-4 text-muted; }
+
+    /* Inline code only; fenced blocks are styled by CodeBlock. */
+    & :not(pre) > code {
+      @apply rounded-md bg-surface px-1.5 py-0.5 font-mono text-[0.875em];
+    }
+
+    & .code-block { @apply my-4; }
+    & pre code { @apply font-mono; }
+
+    & .table-wrap { @apply my-4 overflow-x-auto rounded-xl border border-line; }
+    & table { @apply w-full border-collapse text-sm; }
+    & th { @apply border-b border-line bg-surface px-3 py-2 text-left font-semibold; }
+    & td { @apply border-b border-line px-3 py-2 align-top; }
+    & tr:last-child td { @apply border-b-0; }
+  }
+
+  /* Blinking cursor after the last streamed text, wherever the last block ends. */
+  .streaming-cursor > :is(p, h1, h2, h3, h4, h5, h6, blockquote):last-child::after,
+  .streaming-cursor > :is(ul, ol):last-child > li:last-child::after,
+  .streaming-cursor > .code-block:last-child pre > code::after {
+    content: '';
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    border-radius: 2px;
+    background: var(--color-fg);
+    animation: cursor-blink 1s steps(2, start) infinite;
+  }
+
+  /* Code blocks are dark in both themes, so the cursor there is always light. */
+  .streaming-cursor > .code-block:last-child pre > code::after {
+    background: #e6e6e6;
+  }
+}
+
+/* Unlayered on purpose: the highlight.js theme is unlayered CSS, which beats any @layer rule.
+   CodeBlock provides the frame, so the theme's own background and padding are removed. */
+.markdown pre code.hljs {
+  padding: 0;
+  background: transparent;
+}
+
+@keyframes cursor-blink {
+  to {
+    visibility: hidden;
+  }
+}
