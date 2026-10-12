@@ -19,7 +19,7 @@ export const redactCredentials = (text) =>
   String(text).replace(/(mongodb(?:\+srv)?:\/\/)[^\s@]+@/gi, '$1***:***@');
 
 const NETWORK_HINTS = [
-  'Set DNS_SERVERS in server/.env (e.g. 8.8.8.8,1.1.1.1) if your ISP/router DNS refuses SRV lookups.',
+  'Set DNS_SERVERS in server/.env (e.g. 8.8.8.8,1.1.1.1) if your ISP/router DNS refuses SRV lookups (development only).',
   'Add your current IP under Atlas > Network Access (IP access list).',
   'Check in Atlas that the cluster is not paused.',
   'Or use the standard "mongodb://" connection string (Atlas > Connect > Drivers) to skip the SRV lookup.',
@@ -59,7 +59,8 @@ export async function connectDB() {
 
   // mongodb+srv:// needs an SRV DNS lookup, which some ISP/router resolvers refuse.
   // setServers() only affects dns.resolve*() (what the driver uses for SRV/TXT), not dns.lookup().
-  if (env.MONGO_URI.startsWith('mongodb+srv://')) {
+  // Local workaround only: in production (Render) the host's own resolvers are used.
+  if (!env.isProd && env.MONGO_URI.startsWith('mongodb+srv://')) {
     dns.setServers(env.DNS_SERVERS);
     console.log(`[db] Using DNS servers for SRV lookup: ${env.DNS_SERVERS.join(', ')}`);
   }

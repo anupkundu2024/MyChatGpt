@@ -54,7 +54,7 @@ app.js         Express app (no listen); server.js connects DB and listens
 ## Auth
 
 - Email/password. Hash passwords with bcrypt.
-- JWT access token (short-lived) and refresh token (long-lived), both in `httpOnly`, `sameSite=strict` cookies that are `secure` in production. Never in localStorage, and never in response bodies.
+- JWT access token (short-lived) and refresh token (long-lived), both in `httpOnly` cookies: `sameSite=strict` in development, `secure` + `sameSite=lax` in production (Vercel rewrites `/api` to Render, so they stay first-party). Never in localStorage, and never in response bodies.
 - Revocation uses `User.tokenVersion`: both tokens carry it, and logout increments it, which signs the user out on every device.
 - Rate-limit auth routes with express-rate-limit (`middleware/rateLimit.js`).
 
